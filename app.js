@@ -159,6 +159,24 @@ var UIController = (function() {
         expensesPercentages: '.item__percentage'
     };
     
+    // 2310.4567 -> + 2,310.46
+    var formatNumber = function(num, type) {
+        var numSplit, int, dec;
+
+        num = Math.abs(num);
+        num = num.toFixed(2);
+
+        numSplit = num.split('.');
+
+        int = numSplit[0];
+        if (int.length > 3) {
+            int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3); // input 2310, output 2,310
+        }
+        dec = numSplit[1];
+
+        return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+    };
+    
     return {
         getInput: function() {
             return {
@@ -185,7 +203,7 @@ var UIController = (function() {
             // Replace the placeholder text with some actual data
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
-            newHtml = newHtml.replace('%value%', obj.value);
+            newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
             
             // Insert the HTML into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
@@ -211,9 +229,9 @@ var UIController = (function() {
         },
         
         displayBudget: function(obj) {
-            document.querySelector(DOMstrings.budgetValue).textContent = obj.budget;
-            document.querySelector(DOMstrings.incomeValue).textContent = obj.totalInc;
-            document.querySelector(DOMstrings.expenseValue).textContent = obj.totalExp;
+            document.querySelector(DOMstrings.budgetValue).textContent = formatNumber(obj.budget, obj.budget >= 0 ? 'inc' : 'exp');
+            document.querySelector(DOMstrings.incomeValue).textContent = formatNumber(obj.totalInc, 'inc');
+            document.querySelector(DOMstrings.expenseValue).textContent = formatNumber(obj.totalExp, 'exp');
             
             if (obj.percentage > 0) {
                 document.querySelector(DOMstrings.expensePercent).textContent = obj.percentage + '%';
